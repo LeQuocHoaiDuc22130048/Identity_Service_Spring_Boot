@@ -1,5 +1,7 @@
 package com.hoaiduc.identity.dto.request;
 
+import com.hoaiduc.identity.validator.DobConstraint;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -19,5 +21,8 @@ public class UserCreationRequest {
     String password;
     String firstName;
     String lastName;
+
+    @DobConstraint(min = 16, message = "INVALID_DOB")
+    @NotNull
     LocalDate birthDate;
 }
