@@ -3,6 +3,7 @@ package com.hoaiduc.identity.service;
 import com.hoaiduc.identity.dto.request.AuthenticationRequest;
 import com.hoaiduc.identity.dto.request.IntrospectRequest;
 import com.hoaiduc.identity.dto.request.LogoutRequest;
+import com.hoaiduc.identity.dto.request.RefreshRequest;
 import com.hoaiduc.identity.dto.response.AuthenticationResponse;
 import com.hoaiduc.identity.dto.response.IntrospectResponse;
 import com.hoaiduc.identity.entity.InvalidedToken;
@@ -90,6 +91,30 @@ public class AuthenticationService {
         if (tokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         return signedJWT;
+    }
+
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signedJWT = verifyToken(request.getToken());
+
+        var jit = signedJWT.getJWTClaimsSet().getJWTID();
+        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidedToken invalidedToken = InvalidedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        tokenRepository.save(invalidedToken);
+
+        var username = signedJWT.getJWTClaimsSet().getSubject();
+
+        var user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        var token = generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(token)
+                .authenticated(true)
+                .build();
     }
 
     // generate token

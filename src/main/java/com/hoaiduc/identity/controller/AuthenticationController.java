@@ -1,9 +1,6 @@
 package com.hoaiduc.identity.controller;
 
-import com.hoaiduc.identity.dto.request.ApiResponse;
-import com.hoaiduc.identity.dto.request.AuthenticationRequest;
-import com.hoaiduc.identity.dto.request.IntrospectRequest;
-import com.hoaiduc.identity.dto.request.LogoutRequest;
+import com.hoaiduc.identity.dto.request.*;
 import com.hoaiduc.identity.dto.response.AuthenticationResponse;
 import com.hoaiduc.identity.dto.response.IntrospectResponse;
 import com.hoaiduc.identity.service.AuthenticationService;
@@ -45,6 +42,14 @@ public class AuthenticationController {
     public ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
         authenticationService.logout(request);
         return ApiResponse.<Void>builder()
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthenticationResponse> authenticate(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+        var result = authenticationService.refreshToken(request);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .result(result)
                 .build();
     }
 }
