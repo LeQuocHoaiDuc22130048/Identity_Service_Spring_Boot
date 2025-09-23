@@ -2,11 +2,14 @@ package com.hoaiduc.identity.service;
 
 import com.hoaiduc.identity.dto.request.AuthenticationRequest;
 import com.hoaiduc.identity.dto.request.IntrospectRequest;
+import com.hoaiduc.identity.dto.request.LogoutRequest;
 import com.hoaiduc.identity.dto.response.AuthenticationResponse;
 import com.hoaiduc.identity.dto.response.IntrospectResponse;
+import com.hoaiduc.identity.entity.InvalidedToken;
 import com.hoaiduc.identity.entity.User;
 import com.hoaiduc.identity.exception.AppException;
 import com.hoaiduc.identity.exception.ErrorCode;
+import com.hoaiduc.identity.repository.InvalidatedTokenRepository;
 import com.hoaiduc.identity.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -37,6 +40,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
     UserRepository userRepository;
+    InvalidatedTokenRepository tokenRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -55,6 +59,37 @@ public class AuthenticationService {
                 .token(token)
                 .authenticated(true)
                 .build();
+    }
+
+
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jit = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidedToken invalidedToken = InvalidedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        tokenRepository.save(invalidedToken);
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if (!(verified && expirationTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        if (tokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        return signedJWT;
     }
 
     // generate token
@@ -84,19 +119,17 @@ public class AuthenticationService {
         }
     }
 
-    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
+    public IntrospectResponse introspect(IntrospectRequest request) throws ParseException, JOSEException {
         var token = request.getToken();
-
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
+        boolean isValid = true;
+        try {
+            verifyToken(token);
+        } catch (AppException e) {
+            isValid = false;
+        }
 
         return IntrospectResponse.builder()
-                .valid(verified && expirationTime.after(new Date()))
+                .valid(isValid)
                 .build();
 
     }
@@ -104,12 +137,12 @@ public class AuthenticationService {
     private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
 
-        if(!CollectionUtils.isEmpty(user.getRoles()))
+        if (!CollectionUtils.isEmpty(user.getRoles()))
             user.getRoles().forEach(role -> {
-            stringJoiner.add("ROLE_" + role.getName());
-            if (!CollectionUtils.isEmpty(role.getPermissions()))
-                role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
-        });
+                stringJoiner.add("ROLE_" + role.getName());
+                if (!CollectionUtils.isEmpty(role.getPermissions()))
+                    role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
+            });
         return stringJoiner.toString();
     }
 }
