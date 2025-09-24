@@ -2,11 +2,8 @@ package com.hoaiduc.identity.controller;
 
 
 import com.hoaiduc.identity.dto.request.ApiResponse;
-import com.hoaiduc.identity.dto.request.PermissionRequest;
 import com.hoaiduc.identity.dto.request.RoleRequest;
-import com.hoaiduc.identity.dto.response.PermissionResponse;
 import com.hoaiduc.identity.dto.response.RoleResponse;
-import com.hoaiduc.identity.service.PermissionService;
 import com.hoaiduc.identity.service.RoleService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
