@@ -1,17 +1,18 @@
 package com.hoaiduc.identity.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
 
 import com.hoaiduc.identity.dto.request.ApiResponse;
 import com.hoaiduc.identity.dto.request.PermissionRequest;
 import com.hoaiduc.identity.dto.response.PermissionResponse;
 import com.hoaiduc.identity.service.PermissionService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -40,5 +41,4 @@ public class PermissionController {
         permissionService.delete(permission);
         return ApiResponse.<Void>builder().build();
     }
-
 }

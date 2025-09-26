@@ -1,19 +1,22 @@
 package com.hoaiduc.identity.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
 import com.hoaiduc.identity.dto.request.ApiResponse;
 import com.hoaiduc.identity.dto.request.UserCreationRequest;
 import com.hoaiduc.identity.dto.request.UserUpdateRequest;
 import com.hoaiduc.identity.dto.response.UserResponse;
 import com.hoaiduc.identity.service.UserService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController

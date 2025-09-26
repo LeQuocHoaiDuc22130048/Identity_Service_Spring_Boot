@@ -1,11 +1,10 @@
 package com.hoaiduc.identity.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hoaiduc.identity.dto.request.UserCreationRequest;
-import com.hoaiduc.identity.dto.response.UserResponse;
-import com.hoaiduc.identity.service.UserService;
-import lombok.extern.slf4j.Slf4j;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +17,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hoaiduc.identity.dto.request.UserCreationRequest;
+import com.hoaiduc.identity.dto.response.UserResponse;
+import com.hoaiduc.identity.service.UserService;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
@@ -60,43 +62,39 @@ public class UserControllerTest {
     }
 
     @Test
-        // comment it
+    // comment it
     void createUser_validRequest_success() throws Exception {
-        //Given
+        // Given
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String content = objectMapper.writeValueAsString(request);
-        when(userService.createUser(any())).thenReturn(response); //when declare this method result will return in test not run in main application
-        //when, then
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/users")
+        when(userService.createUser(any()))
+                .thenReturn(
+                        response); // when declare this method result will return in test not run in main application
+        // when, then
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(content))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value(1000))
                 .andExpect(MockMvcResultMatchers.jsonPath("result.id").value("4ddd76387ff8"));
-
     }
 
-
     @Test
-        // comment it
+    // comment it
     void createUser_usernameInvalid_fail() throws Exception {
-        //Given
+        // Given
         request.setUsername("Du");
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String content = objectMapper.writeValueAsString(request);
 
-
-        //when, then
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/users")
+        // when, then
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(content))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value(1002))
                 .andExpect(MockMvcResultMatchers.jsonPath("message").value("Username must be at least 3 characters"));
-
     }
 }

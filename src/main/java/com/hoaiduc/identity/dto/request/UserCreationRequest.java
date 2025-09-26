@@ -1,12 +1,14 @@
 package com.hoaiduc.identity.dto.request;
 
-import com.hoaiduc.identity.validator.DobConstraint;
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import com.hoaiduc.identity.validator.DobConstraint;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
 
 @Data
 @Builder
@@ -19,6 +21,7 @@ public class UserCreationRequest {
 
     @Size(min = 8, message = "PASSWORD_INVALID")
     String password;
+
     String firstName;
     String lastName;
 

@@ -1,21 +1,23 @@
 package com.hoaiduc.identity.configuration;
 
-import com.hoaiduc.identity.constant.PredefinedRole;
-import com.hoaiduc.identity.entity.Role;
-import com.hoaiduc.identity.entity.User;
-import com.hoaiduc.identity.repository.RoleRepository;
-import com.hoaiduc.identity.repository.UserRepository;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashSet;
+
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.HashSet;
+import com.hoaiduc.identity.constant.PredefinedRole;
+import com.hoaiduc.identity.entity.Role;
+import com.hoaiduc.identity.entity.User;
+import com.hoaiduc.identity.repository.RoleRepository;
+import com.hoaiduc.identity.repository.UserRepository;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @RequiredArgsConstructor
@@ -28,10 +30,12 @@ public class ApplicationInitConfig {
 
     @NonFinal
     static final String ADMIN_PASSWORD = "admin";
+
     PasswordEncoder passwordEncoder;
 
     @Bean
-//    @ConditionalOnProperty(prefix = "spring", value = "datasource.driverClassName", havingValue = "com.mysql.cj.jdbc.Driver")
+    //    @ConditionalOnProperty(prefix = "spring", value = "datasource.driverClassName", havingValue =
+    // "com.mysql.cj.jdbc.Driver")
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         log.info("Init application....");
         return args -> {

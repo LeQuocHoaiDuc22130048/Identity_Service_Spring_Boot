@@ -1,10 +1,13 @@
 package com.hoaiduc.identity.service;
 
-import com.hoaiduc.identity.dto.request.UserCreationRequest;
-import com.hoaiduc.identity.dto.response.UserResponse;
-import com.hoaiduc.identity.entity.User;
-import com.hoaiduc.identity.exception.AppException;
-import com.hoaiduc.identity.repository.UserRepository;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,12 +17,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-import java.time.LocalDate;
-import java.util.Optional;
+import com.hoaiduc.identity.dto.request.UserCreationRequest;
+import com.hoaiduc.identity.dto.response.UserResponse;
+import com.hoaiduc.identity.entity.User;
+import com.hoaiduc.identity.exception.AppException;
+import com.hoaiduc.identity.repository.UserRepository;
 
 @SpringBootTest
 @TestPropertySource("/application-test.properties")
@@ -27,8 +29,10 @@ public class UserServiceTest {
 
     @Autowired
     private UserService userService;
+
     @MockitoBean
     private UserRepository userRepository;
+
     private UserCreationRequest request;
     private UserResponse response;
     private LocalDate dateOfBirth;
@@ -68,21 +72,20 @@ public class UserServiceTest {
         when(userRepository.existsByUsername(anyString())).thenReturn(false);
         when(userRepository.save(any())).thenReturn(user);
 
-        //WHEN
+        // WHEN
         var userResponse = userService.createUser(request);
 
-        //THEN
+        // THEN
         Assertions.assertThat(userResponse.getId()).isEqualTo("4ddd76387ff8");
         Assertions.assertThat(userResponse.getUsername()).isEqualTo("HoaiDuc");
     }
-
 
     @Test
     void createUser_userExisted_fail() {
         // GIVEN
         when(userRepository.existsByUsername(anyString())).thenReturn(true);
 
-        //WHEN
+        // WHEN
         var exception = assertThrows(AppException.class, () -> userService.createUser(request));
         Assertions.assertThat(exception.getErrorCode().getCode()).isEqualTo(1001);
     }

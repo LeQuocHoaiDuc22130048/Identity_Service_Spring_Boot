@@ -16,17 +16,16 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private static final String[] PUBLIC_ENDPOINTS = {"/users", "/auth/token", "/auth/introspect", "/auth/log-out", "/auth/refresh"};
-
+    private static final String[] PUBLIC_ENDPOINTS = {
+        "/users", "/auth/token", "/auth/introspect", "/auth/log-out", "/auth/refresh"
+    };
 
     private final CustomJwtDecoder jwtDecoder;
-
 
     public SecurityConfig(CustomJwtDecoder jwtDecoder) {
         this.jwtDecoder = jwtDecoder;
@@ -34,11 +33,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll().anyRequest().authenticated());
+        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+                .permitAll()
+                .anyRequest()
+                .authenticated());
 
-        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder).jwtAuthenticationConverter(jwtGrantedAuthoritiesConverter()))
-                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-        );
+        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
+                        jwtConfigurer.decoder(jwtDecoder).jwtAuthenticationConverter(jwtGrantedAuthoritiesConverter()))
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         httpSecurity.cors(httpSecurityCorsConfigurer -> {}).csrf(AbstractHttpConfigurer::disable);
 
         return httpSecurity.build();
@@ -67,7 +69,6 @@ public class SecurityConfig {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
     }
-
 
     @Bean
     PasswordEncoder passwordEncoder() {

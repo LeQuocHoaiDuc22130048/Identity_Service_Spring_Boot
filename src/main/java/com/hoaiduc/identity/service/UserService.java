@@ -1,5 +1,15 @@
 package com.hoaiduc.identity.service;
 
+import java.util.HashSet;
+import java.util.List;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.hoaiduc.identity.constant.PredefinedRole;
 import com.hoaiduc.identity.dto.request.UserCreationRequest;
 import com.hoaiduc.identity.dto.request.UserUpdateRequest;
@@ -11,19 +21,11 @@ import com.hoaiduc.identity.exception.ErrorCode;
 import com.hoaiduc.identity.mapper.UserMapper;
 import com.hoaiduc.identity.repository.RoleRepository;
 import com.hoaiduc.identity.repository.UserRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -35,7 +37,6 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     RoleRepository roleRepository;
-
 
     public UserResponse createUser(UserCreationRequest request) {
 
@@ -64,15 +65,15 @@ public class UserService {
     @PostAuthorize("returnObject.username == authentication.name")
     public UserResponse getUser(String id) {
         log.info("In method getUser(String)");
-        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
+        return userMapper.toUserResponse(
+                userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
     }
 
     public UserResponse getMyInfo() {
         var contextHolder = SecurityContextHolder.getContext();
         String name = contextHolder.getAuthentication().getName();
 
-        User user = userRepository.findByUsername(name).orElseThrow(
-                () -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.toUserResponse(user);
     }
 
